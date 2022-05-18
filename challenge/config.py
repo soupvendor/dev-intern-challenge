@@ -3,6 +3,5 @@ from pydantic import BaseSettings
 
 class Settings(BaseSettings):
     db_path = "../data/test.db"
-    locations = set()
 
 settings = Settings()
