@@ -1,23 +1,26 @@
 import sqlite3
-from config import settings
 from models.models import Item, ItemResponse, Location
 from db import Database
 
 
-
 def create_entry(item: Item, db: Database) -> ItemResponse:
-    db.curr.execute(
-        """INSERT INTO items
-                    (name, description, location)
-                    VALUES (?, ?, ?)""",
-        (item.name, item.description, item.location),
-    )
-    db.conn.commit()
-    new_id = db.curr.lastrowid
-    data = ItemResponse(
-        id=new_id, name=item.name, description=item.description, location=item.location
-    )
-    return data
+
+    if db.validate_location(item.location):
+        db.curr.execute(
+            """INSERT INTO items
+                        (name, description, location)
+                        VALUES (?, ?, ?)""",
+            (item.name, item.description, item.location),
+        )
+        db.conn.commit()
+        new_id = db.curr.lastrowid
+        data = ItemResponse(
+            id=new_id,
+            name=item.name,
+            description=item.description,
+            location=item.location,
+        )
+        return data
 
 
 def read_entry(id_: int, db: Database) -> ItemResponse:
@@ -54,7 +57,16 @@ def delete_entry(id_: int, db: Database) -> None:
         db.conn.commit()
 
 
-# Bonus feature
+def list_items(db: Database) -> list[ItemResponse]:
+    data = db.curr.execute("SELECT * FROM items").fetchall()
+    items = [
+        ItemResponse(id=item[0], name=item[1], description=item[2], location=item[3])
+        for item in data
+    ]
+    return items
+
+
+# Bonus features
 
 
 def create_location_entry(location: Location, db: Database) -> Location:
@@ -72,3 +84,14 @@ def create_location_entry(location: Location, db: Database) -> Location:
         address=location.address,
     )
     return data
+
+
+def list_locations(db: Database) -> list[Location]:
+    data = db.curr.execute("SELECT * FROM locations").fetchall()
+    locations = [
+        Location(
+            id=location[0], name=location[1], process=location[2], address=location[3]
+        )
+        for location in data
+    ]
+    return locations

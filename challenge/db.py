@@ -22,6 +22,11 @@ class Database:
                         address TEXT)"""
         )
 
-    def select_row_by_id(self, id_):
+    def select_row_by_id(self, id_) -> list | None:
         data = self.curr.execute("SELECT * FROM items WHERE id == ?", (id_,)).fetchone()
+        return data
+
+    def validate_location(self, id_) -> list | None:
+        data = self.curr.execute(
+            "SELECT * FROM locations WHERE id == ?", (id_,)).fetchone()
         return data
